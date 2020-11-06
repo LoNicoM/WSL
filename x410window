@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if [ ! $HOSTIP ]; then
+	export HOSTIP=$(./get_host.py)
+	export DISPLAY=$HOSTIP:0.0
+fi
+
+# LOAD SERVICES HERE
+sudo service piavpn start
+
+if [ ! $(pgrep X410) ]; then
+	/mnt/d/Program\ Files/x410/X410.exe /wm /public 2> /dev/null &
+	sleep 2
+	export QT_SCALE_FACTOR=2
+	export XCURSOR_SIZE=48
+	export GDK_SCALE=2
+	export PULSE_SERVER=tcp:$HOSTIP
+	if [ ! $(pgrep pulse) ]; then
+		/usr/bin/start-pulse
+	fi
+	x-session-manager 2> /dev/null
+fi
+
+echo "Killing processes..."
+pkill pulseaudio
+pkill X410
+pkill xiccd
